@@ -1,0 +1,21 @@
+# OS thumbnails
+.DS_Store
+Thumbs.db
+
+# Package managers
+/vendor/
+/node_modules/
+composer.phar
+
+# IDE supports
+.idea
+.vscode
+*.sublime-workspace
+*.sublime-project
+.codeintel
+
+# Tests
+codecept.phar
+
+# Logs
+error_log
