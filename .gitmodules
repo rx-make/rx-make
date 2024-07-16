@@ -1,4 +1,4 @@
 [submodule "public"]
-	path = public
-	url = https://github.com/rhymix/rhymix
+    path = public
+    url = https://github.com/rhymix/rhymix
     ignore = untracked
