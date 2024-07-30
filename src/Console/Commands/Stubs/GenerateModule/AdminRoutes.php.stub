@@ -1,0 +1,18 @@
+<?php /** @noinspection PhpUnused */
+
+declare(strict_types=1);
+
+namespace {{ $namespace }}\Routes;
+
+use FastRoute\ConfigureRoutes;
+use RxMake\Module\BaseModuleRoutes;
+
+class {{ $identifier }}AdminRoutes extends BaseModuleRoutes
+{
+    public function routes(ConfigureRoutes $r): void
+    {
+        $r->get('/', function () {
+            return '{{ $name }}';
+        });
+    }
+}

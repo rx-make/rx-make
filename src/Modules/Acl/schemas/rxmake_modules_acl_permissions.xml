@@ -1,0 +1,8 @@
+<table>
+    <column name="primarySrl" type="number" primary-key="true" />
+    <column name="targetType" type="char" size="20" notnull="true" index="idxTargetType" />
+    <column name="targetSrl" type="number" notnull="true" index="idxTargetSrl" />
+    <column name="permissionIdentifier" type="text" notnull="true" />
+    <column name="createdAt" type="date" notnull="true" />
+    <column name="updatedAt" type="date" />
+</table>

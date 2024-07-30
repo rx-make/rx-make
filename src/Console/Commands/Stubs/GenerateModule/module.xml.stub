@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module version="0.2" rxmake-compatible="true">
+    <namespaces>
+        <namespace name="{{ $namespace }}" />
+    </namespaces>
+    <actions>
+        <action
+            name="disp{{ $fullyQualifiedPrefix }}HandleRequest"
+            class="Routes\{{ $identifier }}ClientRoutes"
+            method="GET|POST|PUT|PATCH|OPTIONS|HEAD"
+            route="{{ $hyphenedIdentifier }}.*"
+            standalone="true"
+        />
+        <action
+            name="disp{{ $fullyQualifiedPrefix }}AdminHandleRequest"
+            class="Routes\{{ $identifier }}AdminRoutes"
+            method="GET|POST|PUT|PATCH|OPTIONS|HEAD"
+            admin-index="true"
+        />
+    </actions>
+</module>

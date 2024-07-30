@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module version="0.2" rxmake-compatible="true">
+    <namespaces>
+        <namespace name="RxMake\Modules\Acl" />
+    </namespaces>
+    <actions>
+        <action
+            name="dispRxmake_modules_aclAdminHandleRequest"
+            class="Routes\AclAdminRoutes"
+            method="GET|POST|PUT|PATCH|OPTIONS|HEAD"
+            admin-index="true"
+        />
+    </actions>
+</module>

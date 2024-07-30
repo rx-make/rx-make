@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module version="0.2">
+    <title xml:lang="ko">GitHubPuller</title>
+    <description xml:lang="ko">
+        GitHub 웹훅 이벤트를 수신하여 `git pull` 명령어를 자동으로 실행합니다.
+    </description>
+    <description xml:lang="en">
+        Listen to the GitHub webhook event to automatically execute the `git pull` command.
+    </description>
+    <description xml:lang="ja">
+        GitHub webhook イベントを受信して `git pull` コマンドを自動で実行します。
+    </description>
+</module>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module version="0.2">
+    <title xml:lang="ko">Dummy</title>
+    <description xml:lang="ko">
+        어떠한 기능도 하지 않습니다.
+    </description>
+    <description xml:lang="en">
+        Doesn't do anything.
+    </description>
+    <description xml:lang="ja">
+        いかなる機能もしません。
+    </description>
+</module>

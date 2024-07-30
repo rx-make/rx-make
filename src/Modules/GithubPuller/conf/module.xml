@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module version="0.2" rxmake-compatible="true">
+    <namespaces>
+        <namespace name="RxMake\Modules\GithubPuller" />
+    </namespaces>
+    <actions>
+        <action
+            name="dispRxmake_modules_githubpullerHandleRequest"
+            class="Routes\GithubPullerClientRoutes"
+            method="GET|POST|PUT|PATCH|OPTIONS|HEAD"
+            route="github-puller.*"
+            standalone="true"
+        />
+        <action
+            name="dispRxmake_modules_githubpullerAdminHandleRequest"
+            class="Routes\GithubPullerAdminRoutes"
+            method="GET|POST|PUT|PATCH|OPTIONS|HEAD"
+            admin-index="true"
+        />
+    </actions>
+</module>

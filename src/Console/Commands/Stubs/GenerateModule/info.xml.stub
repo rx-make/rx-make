@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module version="0.2">
+    <title xml:lang="ko">{{ $name }}</title>
+    <description xml:lang="ko">
+        {{ $name }}
+    </description>
+</module>

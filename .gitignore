@@ -19,3 +19,6 @@ codecept.phar
 
 # Logs
 error_log
+
+# Environments
+.env

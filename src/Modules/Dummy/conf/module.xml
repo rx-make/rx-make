@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module version="0.2" rxmake-compatible="true">
+    <namespaces>
+        <namespace name="RxMake\Modules\Dummy" />
+    </namespaces>
+    <actions>
+        <action
+            name="dispRxmake_modules_dummyHandleRequest"
+            class="Routes\DummyClientRoutes"
+            method="GET|POST|PUT|PATCH|OPTIONS|HEAD"
+            index="true"
+        />
+    </actions>
+    <eventHandlers>
+        <eventHandler
+            after="menu.getModuleListInSitemap"
+            class="EventHandlers\GetModuleListInSitemapEventHandler"
+            method="handleAfter"
+        />
+    </eventHandlers>
+</module>

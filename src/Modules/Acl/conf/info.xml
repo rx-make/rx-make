@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module version="0.2">
+    <title xml:lang="ko">Acl</title>
+    <description xml:lang="ko">
+        접근 제어 목록을 구현합니다.
+    </description>
+    <description xml:lang="en">
+        Implement an access control list.
+    </description>
+    <description xml:lang="ja">
+        アクセス制御リストを実装します。
+    </description>
+</module>
