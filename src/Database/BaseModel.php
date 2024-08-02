@@ -59,6 +59,8 @@ abstract class BaseModel
     }
 
     /**
+     * Find records by a filter.
+     *
      * @param Closure(Filter): Filter $where
      * @param int     $offset
      * @param int     $limit
@@ -88,6 +90,81 @@ abstract class BaseModel
         return array_map(function ($record) {
             return static::create($record);
         }, $data);
+    }
+
+    /**
+     * Insert $item into database.
+     *
+     * @param static $item
+     *
+     * @throws DBError
+     */
+    public static function insert(self $item): bool
+    {
+        $oDB = DB::getInstance();
+        $stmt = $oDB->query(
+            sprintf(
+                'INSERT INTO %s (%s) VALUES (%s)',
+                static::TableName,
+                implode(', ', array_keys($item->getColumns())),
+                implode(', ', array_map(fn () => '?', $item->getColumns())),
+            ),
+            ...array_map(function (array $column) use ($item) {
+                return $item->{$column['name']};
+            }, $item->getColumns()),
+        );
+        return $stmt->execute();
+    }
+
+    /**
+     * Update an $item.
+     *
+     * @param static $item
+     *
+     * @throws DBError
+     */
+    public static function update(self $item): bool
+    {
+        $oDB = DB::getInstance();
+        $stmt = $oDB->query(
+            sprintf(
+                'UPDATE %s SET %s WHERE %s = ?',
+                static::TableName,
+                implode(', ', array_map(function ($column) {
+                    return $column['name'] . ' = ?';
+                }, $item->getColumns())),
+                static::PrimaryKey,
+            ),
+            ...[
+                ...array_map(function (array $column) use ($item) {
+                    return $item->{$column['name']};
+                }, $item->getColumns()),
+                $item->{static::PrimaryKey},
+            ]
+        );
+        return $stmt->execute();
+    }
+
+    /**
+     * Delete an item.
+     *
+     * @param static $item
+     *
+     * @return bool
+     * @throws DBError
+     */
+    public static function delete(self $item): bool
+    {
+        $oDB = DB::getInstance();
+        $stmt = $oDB->query(
+            sprintf(
+                'DELETE FROM %s WHERE %s = ?',
+                static::TableName,
+                static::PrimaryKey,
+            ),
+            $item->{static::PrimaryKey},
+        );
+        return $stmt->execute();
     }
 
     /**
