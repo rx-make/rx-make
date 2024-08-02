@@ -55,7 +55,7 @@ class Filter
                 $stack['value'] = array_values($stack['value']);
                 return [
                     sprintf(
-                        '%s %s (%s)',
+                        '`%s` %s (%s)',
                         $stack['column'],
                         $stack['operator'],
                         implode(', ', array_map(fn () => '?', $stack['value']))
@@ -65,7 +65,7 @@ class Filter
             }
             return [
                 sprintf(
-                    '%s %s %s',
+                    '`%s` %s %s',
                     $stack['column'],
                     $stack['operator'],
                     '?',
