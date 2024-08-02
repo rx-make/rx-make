@@ -106,7 +106,9 @@ abstract class BaseModel
             sprintf(
                 'INSERT INTO %s (%s) VALUES (%s)',
                 static::TableName,
-                implode(', ', array_keys($item->getColumns())),
+                implode(', ', array_map(function ($column) {
+                    return '`' . $column['name'] . '`';
+                }, $item->getColumns())),
                 implode(', ', array_map(fn () => '?', $item->getColumns())),
             ),
             ...array_map(function (array $column) use ($item) {
@@ -131,7 +133,7 @@ abstract class BaseModel
                 'UPDATE %s SET %s WHERE %s = ?',
                 static::TableName,
                 implode(', ', array_map(function ($column) {
-                    return $column['name'] . ' = ?';
+                    return '`' . $column['name'] . '` = ?';
                 }, $item->getColumns())),
                 static::PrimaryKey,
             ),
