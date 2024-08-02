@@ -11,6 +11,7 @@ use PDO;
 use ReflectionClass;
 use ReflectionProperty;
 use Rhymix\Framework\Exceptions\DBError;
+use Rhymix\Framework\Parsers\DBQuery\NullValue;
 use RuntimeException;
 use RxMake\Traits\MapperConstructor;
 
@@ -102,7 +103,7 @@ abstract class BaseModel
     public static function insert(self $item): bool
     {
         $oDB = DB::getInstance();
-        $stmt = $oDB->query(
+        $stmt = $oDB->prepare(
             sprintf(
                 'INSERT INTO %s (%s) VALUES (%s)',
                 static::TableName,
@@ -111,11 +112,19 @@ abstract class BaseModel
                 }, $item->getColumns())),
                 implode(', ', array_map(fn () => '?', $item->getColumns())),
             ),
-            ...array_map(function (array $column) use ($item) {
-                return $item->{$column['name']};
-            }, $item->getColumns()),
         );
-        return $stmt->execute();
+        return $stmt->execute(
+            array_values(array_map(function (array $column) use ($item) {
+                $value = $item->{$column['name']};
+                if ($value instanceof DateTime) {
+                    $value = $value->format('YmdHis');
+                }
+                if ($value === null) {
+                    $value = new NullValue();
+                }
+                return $value;
+            }, $item->getColumns()))
+        );
     }
 
     /**
@@ -128,7 +137,7 @@ abstract class BaseModel
     public static function update(self $item): bool
     {
         $oDB = DB::getInstance();
-        $stmt = $oDB->query(
+        $stmt = $oDB->prepare(
             sprintf(
                 'UPDATE %s SET %s WHERE %s = ?',
                 static::TableName,
@@ -136,15 +145,21 @@ abstract class BaseModel
                     return '`' . $column['name'] . '` = ?';
                 }, $item->getColumns())),
                 static::PrimaryKey,
-            ),
-            ...[
-                ...array_map(function (array $column) use ($item) {
-                    return $item->{$column['name']};
-                }, $item->getColumns()),
-                $item->{static::PrimaryKey},
-            ]
+            )
         );
-        return $stmt->execute();
+        return $stmt->execute(array_values([
+            ...array_map(function (array $column) use ($item) {
+                $value = $item->{$column['name']};
+                if ($value instanceof DateTime) {
+                    $value = $value->format('YmdHis');
+                }
+                if ($value === null) {
+                    $value = new NullValue();
+                }
+                return $value;
+            }, $item->getColumns()),
+            $item->{static::PrimaryKey},
+        ]));
     }
 
     /**
