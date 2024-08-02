@@ -119,9 +119,6 @@ abstract class BaseModel
                 if ($value instanceof DateTime) {
                     $value = $value->format('YmdHis');
                 }
-                if ($value === null) {
-                    $value = new NullValue();
-                }
                 return $value;
             }, $item->getColumns()))
         );
@@ -152,9 +149,6 @@ abstract class BaseModel
                 $value = $item->{$column['name']};
                 if ($value instanceof DateTime) {
                     $value = $value->format('YmdHis');
-                }
-                if ($value === null) {
-                    $value = new NullValue();
                 }
                 return $value;
             }, $item->getColumns()),
