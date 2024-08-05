@@ -37,6 +37,16 @@ class Filter
     public function get(): array
     {
         $handleExpression = function (array $stack) {
+            if ($stack['value'] === null) {
+                return [
+                    sprintf(
+                        '`%s` %s',
+                        $stack['column'],
+                        $stack['operator'],
+                    ),
+                    []
+                ];
+            }
             if ($stack['value'] instanceof DateTime) {
                 $stack['value'] = $stack['value']->format('YmdHis');
             }
@@ -265,6 +275,30 @@ class Filter
     }
 
     /**
+     * Add is-null(column IS NULL) expression into filter stack.
+     *
+     * @param string $column
+     *
+     * @return self
+     */
+    public function isNull(string $column): self
+    {
+        return $this->expression('IS NULL', $column, null);
+    }
+
+    /**
+     * Add is-not-null(column IS NOT NULL) expression into filter stack.
+     *
+     * @param string $column
+     *
+     * @return self
+     */
+    public function isNotNull(string $column): self
+    {
+        return $this->expression('IS NOT NULL', $column, null);
+    }
+
+    /**
      * Add or pipe group into filter stack.
      *
      * @param Closure $callback
@@ -288,7 +322,7 @@ class Filter
         return $this->group('AND', $callback);
     }
 
-    private function expression(string $operator, string $column, string|int|bool|DateTime|array $value): self
+    private function expression(string $operator, string $column, string|int|bool|DateTime|array|null $value): self
     {
         $this->currentStack['children'][] = [
             'type' => 'expression',
