@@ -11,7 +11,6 @@ use PDO;
 use ReflectionClass;
 use ReflectionProperty;
 use Rhymix\Framework\Exceptions\DBError;
-use Rhymix\Framework\Parsers\DBQuery\NullValue;
 use RuntimeException;
 use RxMake\Traits\MapperConstructor;
 
@@ -63,13 +62,15 @@ abstract class BaseModel
      * Find records by a filter.
      *
      * @param Closure(Filter): Filter $where
-     * @param int     $offset
-     * @param int     $limit
+     * @param string                  $orderBy
+     * @param bool                    $ascending True to order ASC, false to order DESC
+     * @param int                     $offset
+     * @param int                     $limit
      *
      * @return array
      * @throws DBError
      */
-    public static function find(Closure $where, int $offset = 0, int $limit = 10): array
+    public static function find(Closure $where, string $orderBy = '', bool $ascending = true, int $offset = 0, int $limit = 10): array
     {
         $where($filter = new Filter());
         $filterOutput = $filter->get();
@@ -77,11 +78,13 @@ abstract class BaseModel
         $oDB = DB::getInstance();
         $stmt = $oDB->query(
             sprintf(
-                'SELECT %s FROM %s AS %s WHERE %s LIMIT %s OFFSET %s',
+                'SELECT %s FROM %s AS %s WHERE %s ORDER BY %s %s LIMIT %s OFFSET %s',
                 '*',
                 static::TableName,
                 static::TableName,
                 $filterOutput['query'],
+                $orderBy ?: static::PrimaryKey,
+                $ascending ? 'ASC' : 'DESC',
                 $limit,
                 $offset,
             ),
