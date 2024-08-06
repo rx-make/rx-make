@@ -56,10 +56,10 @@ class Filter
             if (is_array($stack['value'])) {
                 foreach ($stack['value'] as $key => $value) {
                     if ($stack['value'][$key] instanceof DateTime) {
-                        $stack['value'][$key] = $stack['value']->format('YmdHis');
+                        $stack['value'][$key] = $stack['value'][$key]->format('YmdHis');
                     }
-                    else if (is_bool($stack['value'])) {
-                        $stack['value'] = $stack['value'] ? 1 : 0;
+                    else if (is_bool($stack['value'][$key])) {
+                        $stack['value'][$key] = $stack['value'][$key] ? 1 : 0;
                     }
                 }
                 $stack['value'] = array_values($stack['value']);
