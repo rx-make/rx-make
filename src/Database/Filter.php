@@ -55,7 +55,7 @@ class Filter
             }
             if (is_array($stack['value'])) {
                 foreach ($stack['value'] as $key => $value) {
-                    if ($stack['value'] instanceof DateTime) {
+                    if ($stack['value'][$key] instanceof DateTime) {
                         $stack['value'][$key] = $stack['value']->format('YmdHis');
                     }
                     else if (is_bool($stack['value'])) {
