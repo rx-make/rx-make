@@ -37,7 +37,7 @@ class Filter
     public function get(): array
     {
         $handleExpression = function (array $stack) {
-            if ($stack['value'] === null) {
+            if ($stack['operator'] === 'IS NULL' || $stack['operator'] === 'IS NOT NULL') {
                 return [
                     sprintf(
                         '`%s` %s',
@@ -46,6 +46,9 @@ class Filter
                     ),
                     []
                 ];
+            }
+            if ($stack['value'] === null) {
+                return [ '', [] ];
             }
             if ($stack['value'] instanceof DateTime) {
                 $stack['value'] = $stack['value']->format('YmdHis');
