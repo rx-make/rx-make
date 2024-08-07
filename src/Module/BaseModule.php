@@ -43,7 +43,7 @@ class BaseModule extends ModuleObject
                 }
                 $moduleName = $output[1];
                 if ($moduleName) {
-                    return $this->module = $moduleName;
+                    return $this->module = strtolower($moduleName);
                 }
             }
         }
