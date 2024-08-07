@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace RxMake\Modules\GithubPuller\Controllers\Client;
 
 use ModuleObject;
+use Rhymix\Framework\Exceptions\InvalidRequest;
 use Rhymix\Framework\Exceptions\TargetNotFound;
 use RuntimeException;
 use RxMake\Modules\GithubPuller\Models\GithubPullerConfig;
@@ -24,6 +25,9 @@ class GithubPullerClientWebhookController extends ModuleObject
 
         $rawBody = file_get_contents('php://input');
         $signature = $_SERVER['HTTP_X_HUB_SIGNATURE_256'];
+        if (!$signature) {
+            throw new TargetNotFound();
+        }
         if (!$this->validateWebhook($rawBody, $signature, $secretKey)) {
             throw new TargetNotFound();
         }
