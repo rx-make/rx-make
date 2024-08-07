@@ -22,6 +22,7 @@ class Boot
         self::defineConstants($bootstrapDir);
         self::registerEnvironment();
         self::registerHttpRouterRoute();
+        self::registerShutdownEvent();
     }
 
     /**
@@ -102,5 +103,24 @@ class Boot
         $segments = array_slice($segments, 3);
         $route = '/' . trim(implode('/', $segments), '/');
         define('RXMAKE_ROUTE', $route);
+    }
+
+    /**
+     * Register shutdown function and publish the event.
+     *
+     * @return void
+     */
+    private static function registerShutdownEvent(): void
+    {
+        register_shutdown_function(function () {
+            (new ShutdownEvent())->publish('before');
+
+            session_write_close();
+            ignore_user_abort(true);
+            fastcgi_finish_request();
+            set_time_limit(0);
+
+            (new ShutdownEvent())->publish('after');
+        });
     }
 }
