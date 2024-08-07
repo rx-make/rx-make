@@ -154,7 +154,7 @@ abstract class BaseModuleRoutes extends BaseModule
         if (!in_array(RouteOptions::NoCsrfCheck, $options)) {
             if (
                 ($httpMethod === 'POST' || $httpMethod === 'PUT' || $httpMethod === 'PATCH')
-                && Security::checkCSRF()
+                && !Security::checkCSRF()
             ) {
                 throw new SecurityViolation('ERR_CSRF_CHECK_FAILED');
             }
