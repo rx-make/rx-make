@@ -58,9 +58,6 @@ abstract class BaseModuleRoutes extends BaseModule
             $fastRoute = $fastRoute->disableCache();
         }
 
-        if ($_SERVER['HTTP_ACCEPT'] === 'application/json') {
-            Context::setResponseMethod('JSON');
-        }
         $routesInfo = $fastRoute->dispatcher()->dispatch(
             httpMethod: $httpMethod = $_SERVER['REQUEST_METHOD'],
             uri: $this->getModuleScopedRequestUri($httpMethod)
@@ -124,6 +121,10 @@ abstract class BaseModuleRoutes extends BaseModule
 
         foreach ($output as $key => $value) {
             $this->{$key} = $value;
+        }
+
+        if ($_SERVER['HTTP_ACCEPT'] === 'application/json') {
+            Context::setResponseMethod('JSON');
         }
         return $output;
     }
