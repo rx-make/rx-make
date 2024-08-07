@@ -10,12 +10,14 @@
             method="GET|POST|PUT|PATCH|OPTIONS|HEAD"
             route="github-puller.*"
             standalone="true"
+            check-csrf="false"
         />
         <action
             name="dispRxmake_modules_githubpullerAdminHandleRequest"
             class="Routes\GithubPullerAdminRoutes"
             method="GET|POST|PUT|PATCH|OPTIONS|HEAD"
             admin-index="true"
+            check-csrf="false"
         />
     </actions>
 </module>
