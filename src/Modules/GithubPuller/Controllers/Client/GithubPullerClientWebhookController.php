@@ -14,7 +14,7 @@ class GithubPullerClientWebhookController extends ModuleObject
     /**
      * @throws TargetNotFound
      */
-    public function webhook(): void
+    public function handle(): void
     {
         $config = GithubPullerConfig::get();
         $secretKey = $config->secretKey;
