@@ -6,6 +6,7 @@ namespace RxMake\Modules\GithubPuller\Routes;
 
 use FastRoute\ConfigureRoutes;
 use RxMake\Module\BaseModuleRoutes;
+use RxMake\Module\RouteOptions;
 use RxMake\Modules\GithubPuller\Controllers\Client\GithubPullerClientWebhookController;
 
 class GithubPullerClientRoutes extends BaseModuleRoutes
@@ -15,6 +16,6 @@ class GithubPullerClientRoutes extends BaseModuleRoutes
         $r->post('/webhook', [
             GithubPullerClientWebhookController::class,
             'handle'
-        ]);
+        ], [ RouteOptions::NoCsrfCheck ]);
     }
 }
