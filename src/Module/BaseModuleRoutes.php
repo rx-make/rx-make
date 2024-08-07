@@ -59,7 +59,7 @@ abstract class BaseModuleRoutes extends BaseModule
         }
 
         $routesInfo = $fastRoute->dispatcher()->dispatch(
-            httpMethod: $httpMethod = $_SERVER['HTTP_X_AJAX_COMPAT_METHOD'] ?? $_SERVER['REQUEST_METHOD'],
+            httpMethod: $httpMethod = $_SERVER['REQUEST_METHOD'],
             uri: $this->getModuleScopedRequestUri($httpMethod)
         );
 
@@ -69,7 +69,7 @@ abstract class BaseModuleRoutes extends BaseModule
             case Dispatcher::METHOD_NOT_ALLOWED:
                 throw new InvalidRequest('');
             case Dispatcher::FOUND:
-                $routesInfo = $this->handleRouteOptions($routesInfo);
+                $routesInfo = $this->handleRouteOptions($routesInfo, $httpMethod);
         }
 
         $vars = $routesInfo[2];
@@ -142,13 +142,20 @@ abstract class BaseModuleRoutes extends BaseModule
     }
 
     /**
+     * @param Matched $routesInfo
+     * @param string  $httpMethod
+     *
+     * @return Matched
      * @throws SecurityViolation
      */
-    private function handleRouteOptions(Matched $routesInfo): Matched
+    private function handleRouteOptions(Matched $routesInfo, string $httpMethod): Matched
     {
         $options = $routesInfo->extraParameters;
         if (!in_array(RouteOptions::NoCsrfCheck, $options)) {
-            if (Security::checkCSRF()) {
+            if (
+                ($httpMethod === 'POST' || $httpMethod === 'PUT' || $httpMethod === 'PATCH')
+                && Security::checkCSRF()
+            ) {
                 throw new SecurityViolation('ERR_CSRF_CHECK_FAILED');
             }
         }
