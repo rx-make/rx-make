@@ -10,14 +10,14 @@ use ModuleHandler;
 use RuntimeException;
 use RxMake\Traits\MapperConstructor;
 
-abstract class BaseModuleTrigger
+abstract class BaseModuleEvent
 {
     use MapperConstructor;
 
     private bool $published = false;
 
     /**
-     * Publish trigger.
+     * Publish the event.
      *
      * @param 'before'|'after' $position
      *
@@ -33,11 +33,11 @@ abstract class BaseModuleTrigger
         }
 
         $this->published = true;
-        return ModuleHandler::triggerCall(static::class, $position, $data);
+        return ModuleHandler::triggerCall(self::getTriggerName(), $position, $data);
     }
 
     /**
-     * Listen to the trigger.
+     * Listen to the event.
      *
      * @param 'before'|'after' $position
      * @param callable         $listener
@@ -49,6 +49,16 @@ abstract class BaseModuleTrigger
         if ($position !== 'before' && $position !== 'after') {
             throw new RuntimeException('$position must be one of "before" or "after"');
         }
-        ModuleController::getInstance()->addTriggerFunction(static::class, $position, $listener);
+        ModuleController::getInstance()->addTriggerFunction(self::getTriggerName(), $position, $listener);
+    }
+
+    /**
+     * Get Rhymix trigger name of the event.
+     *
+     * @return string
+     */
+    public static function getTriggerName(): string
+    {
+        return trim(static::class, '\\');
     }
 }
