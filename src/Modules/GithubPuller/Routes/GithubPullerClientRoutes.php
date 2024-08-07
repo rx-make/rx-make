@@ -12,7 +12,7 @@ class GithubPullerClientRoutes extends BaseModuleRoutes
 {
     public function routes(ConfigureRoutes $r): void
     {
-        $r->get('/webhook', [
+        $r->post('/webhook', [
             GithubPullerClientWebhookController::class,
             'handle'
         ]);
