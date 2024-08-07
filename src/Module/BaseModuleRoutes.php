@@ -124,11 +124,7 @@ abstract class BaseModuleRoutes extends BaseModule
             return '/' . trim(Context::get('route') ?? '', '/');
         }
         if ($httpMethod === 'POST' || $httpMethod === 'PUT' || $httpMethod === 'PATCH') {
-            $__route = Context::get('__route');
-            if (is_string($__route)) {
-                return $__route;
-            }
-            return $this->request->url;
+            return RXMAKE_ROUTE ?? '/';
         }
         $segments = explode(
             separator: '/',

@@ -21,6 +21,7 @@ class Boot
     {
         self::defineConstants($bootstrapDir);
         self::registerEnvironment();
+        self::registerHttpRouterRoute();
     }
 
     /**
@@ -79,5 +80,27 @@ class Boot
     {
         Environment::registerGlobals();
         Environment::injectIntoRhymix();
+    }
+
+    /**
+     * Register RXMAKE_ROUTE constant.
+     *
+     * @return void
+     */
+    private static function registerHttpRouterRoute(): void
+    {
+        if (PHP_SAPI === 'cli') {
+            return;
+        }
+
+        $httpMethod = $_SERVER['REQUEST_METHOD'];
+        if ($httpMethod !== 'POST' && !$httpMethod !== 'PUT' && $httpMethod !== 'PATCH') {
+            return;
+        }
+
+        $segments = explode('/', $_SERVER['REQUEST_URI']);
+        $segments = array_slice($segments, 3);
+        $route = '/' . trim(implode('/', $segments), '/');
+        define('RXMAKE_ROUTE', $route);
     }
 }
