@@ -8,10 +8,13 @@ use BaseObject;
 use Context;
 use FastRoute\ConfigureRoutes;
 use FastRoute\Dispatcher;
+use FastRoute\Dispatcher\Result\Matched;
 use FastRoute\FastRoute;
 use ModuleObject;
 use Rhymix\Framework\Exceptions\InvalidRequest;
+use Rhymix\Framework\Exceptions\SecurityViolation;
 use Rhymix\Framework\Exceptions\TargetNotFound;
+use Rhymix\Framework\Security;
 use RuntimeException;
 
 abstract class BaseModuleRoutes extends BaseModule
@@ -35,6 +38,7 @@ abstract class BaseModuleRoutes extends BaseModule
     /**
      * @throws InvalidRequest
      * @throws TargetNotFound
+     * @throws SecurityViolation
      */
     public function handleInternal(): BaseObject
     {
@@ -58,11 +62,14 @@ abstract class BaseModuleRoutes extends BaseModule
             httpMethod: $httpMethod = $_SERVER['HTTP_X_AJAX_COMPAT_METHOD'] ?? $_SERVER['REQUEST_METHOD'],
             uri: $this->getModuleScopedRequestUri($httpMethod)
         );
+
         switch ($routesInfo[0]) {
             case Dispatcher::NOT_FOUND:
                 throw new TargetNotFound();
             case Dispatcher::METHOD_NOT_ALLOWED:
                 throw new InvalidRequest('');
+            case Dispatcher::FOUND:
+                $routesInfo = $this->handleRouteOptions($routesInfo);
         }
 
         $vars = $routesInfo[2];
@@ -132,6 +139,20 @@ abstract class BaseModuleRoutes extends BaseModule
             limit: $limit = str_starts_with($this->request->url, $this->request->mid . '/') ? 3 : 2,
         );
         return '/' . ($segments[$limit - 1] ?? '');
+    }
+
+    /**
+     * @throws SecurityViolation
+     */
+    private function handleRouteOptions(Matched $routesInfo): Matched
+    {
+        $options = $routesInfo->extraParameters;
+        if (!in_array(RouteOptions::NoCsrfCheck, $options)) {
+            if (Security::checkCSRF()) {
+                throw new SecurityViolation('ERR_CSRF_CHECK_FAILED');
+            }
+        }
+        return $routesInfo;
     }
 
     abstract function routes(ConfigureRoutes $r): void;
