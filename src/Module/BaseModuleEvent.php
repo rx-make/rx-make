@@ -33,7 +33,7 @@ abstract class BaseModuleEvent
         }
 
         $this->published = true;
-        return ModuleHandler::triggerCall(self::getTriggerName(), $position, $data);
+        return ModuleHandler::triggerCall(self::getTriggerName(), $position, $this);
     }
 
     /**
