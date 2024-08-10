@@ -7,6 +7,7 @@ namespace RxMake\Database;
 use Closure;
 use DateTime;
 use DB;
+use JsonSerializable;
 use PDO;
 use ReflectionClass;
 use ReflectionProperty;
@@ -14,7 +15,7 @@ use Rhymix\Framework\Exceptions\DBError;
 use RuntimeException;
 use RxMake\Traits\MapperConstructor;
 
-abstract class BaseModel
+abstract class BaseModel implements JsonSerializable
 {
     use MapperConstructor;
 
@@ -258,5 +259,20 @@ abstract class BaseModel
             throw new RuntimeException();
         }
         return $obj;
+    }
+
+    public function jsonSerialize(): array
+    {
+        $arr = [];
+        foreach (static::getColumns() as $name => $column) {
+            if ($this->{$name} instanceof DateTime) {
+                $arr[$name] = $this->{$name}->format('YmdHis');
+            }
+            else {
+                $arr[$name] = $this->{$name};
+            }
+        }
+
+        return $arr;
     }
 }
