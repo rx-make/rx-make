@@ -157,6 +157,9 @@ abstract class BaseModel implements JsonSerializable
                 if ($value instanceof DateTime) {
                     $value = $value->format('YmdHis');
                 }
+                else if (is_bool($value)) {
+                    $value = $value ? 1 : 0;
+                }
                 return $value;
             }, $item->getColumns()),
             $item->{static::PrimaryKey},
