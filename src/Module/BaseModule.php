@@ -7,6 +7,7 @@ namespace RxMake\Module;
 use Context;
 use ModuleObject;
 use RuntimeException;
+use RxMake\Database\BaseModel;
 
 class BaseModule extends ModuleObject
 {
@@ -100,6 +101,54 @@ class BaseModule extends ModuleObject
             $message,
             $type,
         );
+        return $this;
+    }
+
+    /**
+     * Override setter if the $val is instanceof BaseModel
+     *
+     * @param string $key
+     * @param mixed $val
+     *
+     * @return void
+     */
+    public function set($key, $val)
+    {
+        if ($val instanceof BaseModel) {
+            $val = $val->toPlainObject();
+        }
+        parent::set($key, $val);
+    }
+
+    /**
+     * Alias to set().
+     *
+     * @return void
+     * @noinspection PhpMissingReturnTypeInspection
+     */
+    public function add($key, $val)
+    {
+        $this->set($key, $val);
+    }
+
+    /**
+     * Multiple set().
+     *
+     * @param $vars
+     *
+     * @return BaseModule
+     * @noinspection PhpMissingReturnTypeInspection
+     */
+    public function sets($vars)
+    {
+        if (is_object($vars)) {
+            $vars = get_object_vars($vars);
+        }
+        if (is_array($vars)) {
+            foreach ($vars as $key => $val) {
+                $this->set($key, $val);
+            }
+        }
         return $this;
     }
 }
