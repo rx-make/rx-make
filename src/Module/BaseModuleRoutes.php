@@ -59,7 +59,7 @@ abstract class BaseModuleRoutes extends BaseModule
         }
 
         $routesInfo = $fastRoute->dispatcher()->dispatch(
-            httpMethod: $httpMethod = $_SERVER['REQUEST_METHOD'],
+            httpMethod: $httpMethod = RXMAKE_REQUEST_METHOD,
             uri: $this->getModuleScopedRequestUri($httpMethod)
         );
 
@@ -67,7 +67,7 @@ abstract class BaseModuleRoutes extends BaseModule
             case Dispatcher::NOT_FOUND:
                 throw new TargetNotFound();
             case Dispatcher::METHOD_NOT_ALLOWED:
-                throw new InvalidRequest('');
+                throw new InvalidRequest();
             case Dispatcher::FOUND:
                 $routesInfo = $this->handleRouteOptions($routesInfo, $httpMethod);
         }

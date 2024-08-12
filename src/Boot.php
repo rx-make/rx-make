@@ -95,9 +95,12 @@ class Boot
         }
 
         $httpMethod = $_SERVER['REQUEST_METHOD'];
+        define('RXMAKE_REQUEST_METHOD', $httpMethod);
+
         if ($httpMethod !== 'POST' && $httpMethod !== 'PUT' && $httpMethod !== 'PATCH') {
             return;
         }
+        $_SERVER['REQUEST_METHOD'] = 'POST';
 
         $segments = explode('/', $_SERVER['REQUEST_URI']);
         $segments = array_slice($segments, 3);
