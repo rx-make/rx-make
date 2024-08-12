@@ -95,7 +95,7 @@ class Boot
         }
 
         $httpMethod = $_SERVER['REQUEST_METHOD'];
-        if ($httpMethod !== 'POST' && !$httpMethod !== 'PUT' && $httpMethod !== 'PATCH') {
+        if ($httpMethod !== 'POST' && $httpMethod !== 'PUT' && $httpMethod !== 'PATCH') {
             return;
         }
 
