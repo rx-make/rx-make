@@ -14,8 +14,10 @@ use ReflectionProperty;
 use Rhymix\Framework\Exceptions\DBError;
 use RuntimeException;
 use RxMake\Traits\MapperConstructor;
+use Serializable;
+use stdClass;
 
-abstract class BaseModel implements JsonSerializable
+abstract class BaseModel implements JsonSerializable, Serializable
 {
     use MapperConstructor;
 
@@ -221,61 +223,109 @@ abstract class BaseModel implements JsonSerializable
     private static function create(array|object $data): static
     {
         $obj = new static();
+        $obj->fromPlainObject($data);
+        return $obj;
+    }
+
+    /**
+     * Convert the instance to plain object that is compatible with Rhymix SQL.
+     *
+     * @return stdClass
+     */
+    public function toPlainObject(): object
+    {
+        $obj = new stdClass();
         foreach (static::getColumns() as $name => $column) {
-            if (!isset($data[$name])) {
+            if (!isset($this->{$name})) {
                 if ($column['default']) {
                     $obj->{$name} = $column['default'];
                     continue;
                 }
                 if ($column['nullable']) {
+                    $obj->{$name} = null;
                     continue;
                 }
                 throw new RuntimeException();
             }
             if ($column['type'] === DateTime::class) {
-                $obj->{$name} = DateTime::createFromFormat(
+                /** @var DateTime $value */
+                $value = $this->{$name};
+                $obj->{$name} = $value->format('YmdHis');
+                continue;
+            }
+            if ($column['type'] === 'object') {
+                $obj->{$name} = json_encode($this->{$name});
+                continue;
+            }
+            $obj->{$name} = $this->{$name};
+        }
+        return $obj;
+    }
+
+    /**
+     * Inject values to the instance from plain object.
+     *
+     * @param object $data
+     *
+     * @return void
+     */
+    public function fromPlainObject(object $data): void
+    {
+        foreach (static::getColumns() as $name => $column) {
+            if (!isset($data[$name])) {
+                if ($column['default']) {
+                    $this->{$name} = $column['default'];
+                    continue;
+                }
+                if ($column['nullable']) {
+                    $this->{$name} = null;
+                    continue;
+                }
+                throw new RuntimeException();
+            }
+            if ($column['type'] === DateTime::class) {
+                $this->{$name} = DateTime::createFromFormat(
                     format: 'YmdHis',
                     datetime: $data[$name],
                 );
                 continue;
             }
             if ($column['type'] === 'object') {
-                $obj->{$name} = json_decode($data[$name]);
+                $this->{$name} = json_decode($data[$name]);
                 continue;
             }
             if ($column['type'] === 'string') {
-                $obj->{$name} = (string) $data[$name];
+                $this->{$name} = (string) $data[$name];
                 continue;
             }
             if ($column['type'] === 'int') {
-                $obj->{$name} = (int) $data[$name];
+                $this->{$name} = (int) $data[$name];
                 continue;
             }
             if ($column['type'] === 'float') {
-                $obj->{$name} = (float) $data[$name];
+                $this->{$name} = (float) $data[$name];
                 continue;
             }
             if ($column['type'] === 'bool') {
-                $obj->{$name} = (int) $data[$name] === 1;
+                $this->{$name} = (int) $data[$name] === 1;
                 continue;
             }
             throw new RuntimeException();
         }
-        return $obj;
     }
 
-    public function jsonSerialize(): array
+    public function jsonSerialize(): object
     {
-        $arr = [];
-        foreach (static::getColumns() as $name => $column) {
-            if ($this->{$name} instanceof DateTime) {
-                $arr[$name] = $this->{$name}->format('YmdHis');
-            }
-            else {
-                $arr[$name] = $this->{$name};
-            }
-        }
+        return $this->toPlainObject();
+    }
 
-        return $arr;
+    public function __serialize(): array
+    {
+        return (array) $this->toPlainObject();
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $this->fromPlainObject((object) $data);
     }
 }
