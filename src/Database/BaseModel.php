@@ -223,7 +223,7 @@ abstract class BaseModel implements JsonSerializable, Serializable
     private static function create(array|object $data): static
     {
         $obj = new static();
-        $obj->fromPlainObject($data);
+        $obj->fromPlainObject((object) $data);
         return $obj;
     }
 
@@ -272,7 +272,7 @@ abstract class BaseModel implements JsonSerializable, Serializable
     public function fromPlainObject(object $data): void
     {
         foreach (static::getColumns() as $name => $column) {
-            if (!isset($data[$name])) {
+            if (!isset($data->{$name})) {
                 if ($column['default']) {
                     $this->{$name} = $column['default'];
                     continue;
@@ -286,28 +286,28 @@ abstract class BaseModel implements JsonSerializable, Serializable
             if ($column['type'] === DateTime::class) {
                 $this->{$name} = DateTime::createFromFormat(
                     format: 'YmdHis',
-                    datetime: $data[$name],
+                    datetime: $data->{$name},
                 );
                 continue;
             }
             if ($column['type'] === 'object') {
-                $this->{$name} = json_decode($data[$name]);
+                $this->{$name} = json_decode($data->{$name});
                 continue;
             }
             if ($column['type'] === 'string') {
-                $this->{$name} = (string) $data[$name];
+                $this->{$name} = (string) $data->{$name};
                 continue;
             }
             if ($column['type'] === 'int') {
-                $this->{$name} = (int) $data[$name];
+                $this->{$name} = (int) $data->{$name};
                 continue;
             }
             if ($column['type'] === 'float') {
-                $this->{$name} = (float) $data[$name];
+                $this->{$name} = (float) $data->{$name};
                 continue;
             }
             if ($column['type'] === 'bool') {
-                $this->{$name} = (int) $data[$name] === 1;
+                $this->{$name} = (int) $data->{$name} === 1;
                 continue;
             }
             throw new RuntimeException();
@@ -327,5 +327,15 @@ abstract class BaseModel implements JsonSerializable, Serializable
     public function __unserialize(array $data): void
     {
         $this->fromPlainObject((object) $data);
+    }
+
+    public function serialize(): string|null
+    {
+        return serialize($this);
+    }
+
+    public function unserialize(string $data)
+    {
+        return unserialize($data);
     }
 }
