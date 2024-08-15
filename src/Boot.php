@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace RxMake;
 
+use Context;
 use Exception;
 use RxMake\Console\Application;
 use RxMake\Environment\Environment;
@@ -11,6 +12,9 @@ use RxMake\Module\Events\ShutdownEvent;
 
 class Boot
 {
+    private static bool $afterContextInitFunctionsCalled = false;
+    private static array $afterContextInitFunctions = [];
+
     /**
      * Bootstrap application.
      *
@@ -126,5 +130,56 @@ class Boot
 
             (new ShutdownEvent())->publish('after');
         });
+    }
+
+    /**
+     * Register $function to execute after Context::init() called.
+     * If Context::init() has been already called, execute the $function immediately.
+     *
+     * @param callable $function
+     *
+     * @return void
+     */
+    public static function registerAfterContextInitFunction(callable $function): void
+    {
+        if (self::$afterContextInitFunctionsCalled) {
+            $function();
+            return;
+        }
+
+        if (count(self::$afterContextInitFunctions) === 0) {
+            /**
+             * ### EVIL HACKING ###
+             * Context::init() calls Rhymix\Framework\Mobile::isFromMobilePhone() on very late time.
+             * And the method isFromMobilePhone() calls base64_encode_urlsafe() function.
+             * The code below injects some logics when the base64_encode_urlsafe() called.
+             */
+            eval(
+            'namespace Rhymix\Framework {
+                function base64_encode_urlsafe(string $str): string {
+                    \RxMake\Boot::callAfterContextInit();
+                    return strtr(rtrim(base64_encode($str), "="), "+/", "-_");
+                }
+            }'
+            );
+        }
+        self::$afterContextInitFunctions[] = $function;
+    }
+
+    /**
+     * Execute the registered functions by registerAfterContextInitFunction().
+     *
+     * @internal
+     * @return void
+     */
+    public static function callAfterContextInit(): void
+    {
+        if (self::$afterContextInitFunctionsCalled) {
+            return;
+        }
+        array_walk(self::$afterContextInitFunctions, function (callable $function) {
+           $function();
+        });
+        self::$afterContextInitFunctionsCalled = true;
     }
 }
