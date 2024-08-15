@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace RxMake;
+namespace RxMake\Module\Events;
 
 use RxMake\Module\BaseModuleEvent;
 

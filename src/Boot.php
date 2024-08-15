@@ -7,6 +7,7 @@ namespace RxMake;
 use Exception;
 use RxMake\Console\Application;
 use RxMake\Environment\Environment;
+use RxMake\Module\Events\ShutdownEvent;
 
 class Boot
 {
