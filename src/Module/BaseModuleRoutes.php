@@ -16,6 +16,8 @@ use Rhymix\Framework\Exceptions\SecurityViolation;
 use Rhymix\Framework\Exceptions\TargetNotFound;
 use Rhymix\Framework\Security;
 use RuntimeException;
+use RxMake\Module\Events\ThrowableEvent;
+use Throwable;
 
 abstract class BaseModuleRoutes extends BaseModule
 {
@@ -39,94 +41,98 @@ abstract class BaseModuleRoutes extends BaseModule
      * @throws InvalidRequest
      * @throws TargetNotFound
      * @throws SecurityViolation
+     * @throws Throwable
      */
     public function handleInternal(): BaseObject
     {
-        if (!$this->routeActName) {
-            throw new RuntimeException('Cannot call handleInternal() directly');
-        }
-        $this->act = $this->routeActName;
-        $cacheDir = RHYMIX_DIR . '/files/cache/RxMake/Foundation/Modules/BaseModuleRoutes';
-        if (!is_dir($cacheDir)) {
-            mkdir($cacheDir, 0777, true);
-        }
-        $fastRoute = FastRoute::recommendedSettings(
-            $this->routes(...),
-            cacheKey: $cacheDir . '/' . $this->act
-        );
-        if (($_ENV['APP_ENV'] ?? '') === 'develop') {
-            $fastRoute = $fastRoute->disableCache();
-        }
+        try {
+            if (!$this->routeActName) {
+                throw new RuntimeException('Cannot call handleInternal() directly');
+            }
+            $this->act = $this->routeActName;
+            $cacheDir = RHYMIX_DIR . '/files/cache/RxMake/Foundation/Modules/BaseModuleRoutes';
+            if (!is_dir($cacheDir)) {
+                mkdir($cacheDir, 0777, true);
+            }
+            $fastRoute = FastRoute::recommendedSettings(
+                $this->routes(...),
+                cacheKey: $cacheDir . '/' . $this->act
+            );
+            if (($_ENV['APP_ENV'] ?? '') === 'develop') {
+                $fastRoute = $fastRoute->disableCache();
+            }
 
-        $routesInfo = $fastRoute->dispatcher()->dispatch(
-            httpMethod: $httpMethod = RXMAKE_REQUEST_METHOD,
-            uri: $this->getModuleScopedRequestUri($httpMethod)
-        );
+            $routesInfo = $fastRoute->dispatcher()->dispatch(
+                httpMethod: $httpMethod = RXMAKE_REQUEST_METHOD,
+                uri: $this->getModuleScopedRequestUri($httpMethod)
+            );
 
-        switch ($routesInfo[0]) {
-            case Dispatcher::NOT_FOUND:
-                throw new TargetNotFound();
-            case Dispatcher::METHOD_NOT_ALLOWED:
-                throw new InvalidRequest();
-            case Dispatcher::FOUND:
-                $routesInfo = $this->handleRouteOptions($routesInfo, $httpMethod);
-        }
+            switch ($routesInfo[0]) {
+                case Dispatcher::NOT_FOUND:
+                    throw new TargetNotFound();
+                case Dispatcher::METHOD_NOT_ALLOWED:
+                    throw new InvalidRequest();
+                case Dispatcher::FOUND:
+                    $routesInfo = $this->handleRouteOptions($routesInfo, $httpMethod);
+            }
 
-        $vars = $routesInfo[2];
-        foreach ($vars as $key => $value) {
-            Context::set($key, $value);
-        }
+            $vars = $routesInfo[2];
+            foreach ($vars as $key => $value) {
+                Context::set($key, $value);
+            }
 
-        $handler = $routesInfo[1];
-        if (is_callable($handler)) {
-            $output = $handler($vars);
-            if (!($output instanceof BaseObject)) {
-                if ($output === null) {
-                    $output = new BaseObject();
+            $handler = $routesInfo[1];
+            if (is_callable($handler)) {
+                $output = $handler($vars);
+                if (!($output instanceof BaseObject)) {
+                    if ($output === null) {
+                        $output = new BaseObject();
+                    } else if (is_bool($output)) {
+                        $output = new BaseObject($output ? 0 : -1, $output ? 'success' : 'error');
+                    } else if (is_string($output)) {
+                        $output = new BaseObject(0, $output);
+                    } else if (is_array($output) || is_object($output)) {
+                        $output = new BaseObject();
+                        $output->sets($output);
+                    } else {
+                        throw new RuntimeException('Unexpected return type');
+                    }
                 }
-                else if (is_bool($output)) {
-                    $output = new BaseObject($output ? 0 : -1, $output ? 'success' : 'error');
+            } else {
+                if (is_string($handler) && str_contains($handler, '@')) {
+                    $handler = explode('@', $handler, 2);
                 }
-                else if (is_string($output)) {
-                    $output = new BaseObject(0, $output);
+                if (count($handler) !== 2) {
+                    throw new RuntimeException('Unknown route handler');
                 }
-                else if (is_array($output) || is_object($output)) {
-                    $output = new BaseObject();
-                    $output->sets($output);
+                if (!class_exists($handler[0]) || !method_exists($handler[0], $handler[1])) {
+                    throw new RuntimeException('Unknown route handler');
                 }
-                else {
-                    throw new RuntimeException('Unexpected return type');
+                if (!is_subclass_of($handler[0], ModuleObject::class)) {
+                    throw new RuntimeException('Unknown route handler');
                 }
+                $output = $handler[0]::getInstance();
+                foreach ($this as $key => $value) {
+                    $output->{$key} = $value;
+                }
+                $output->{$handler[1]}();
             }
-        }
-        else {
-            if (is_string($handler) && str_contains($handler, '@')) {
-                $handler = explode('@', $handler, 2);
-            }
-            if (count($handler) !== 2) {
-                throw new RuntimeException('Unknown route handler');
-            }
-            if (!class_exists($handler[0]) || !method_exists($handler[0], $handler[1])) {
-                throw new RuntimeException('Unknown route handler');
-            }
-            if (!is_subclass_of($handler[0], ModuleObject::class)) {
-                throw new RuntimeException('Unknown route handler');
-            }
-            $output = $handler[0]::getInstance();
-            foreach ($this as $key => $value) {
-                $output->{$key} = $value;
-            }
-            $output->{$handler[1]}();
-        }
 
-        foreach ($output as $key => $value) {
-            $this->{$key} = $value;
-        }
+            foreach ($output as $key => $value) {
+                $this->{$key} = $value;
+            }
 
-        if ($_SERVER['HTTP_ACCEPT'] === 'application/json') {
-            Context::setResponseMethod('JSON');
+            if ($_SERVER['HTTP_ACCEPT'] === 'application/json') {
+                Context::setResponseMethod('JSON');
+            }
+            return $output;
         }
-        return $output;
+        catch (Throwable $e) {
+            (new ThrowableEvent([
+                'throwable' => $e,
+            ]))->publish('before');
+            throw $e;
+        }
     }
 
     private function getModuleScopedRequestUri(string $httpMethod): string
