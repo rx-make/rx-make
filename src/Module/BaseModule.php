@@ -118,9 +118,9 @@ class BaseModule extends ModuleObject
             $val = $val->toPlainObject();
         }
         if (is_array($val)) {
-            foreach ($val as $key => $v) {
+            foreach ($val as $k => $v) {
                 if ($v instanceof BaseModel) {
-                    $val[$key] = $v->toPlainObject();
+                    $val[$k] = $v->toPlainObject();
                 }
             }
         }
