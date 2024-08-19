@@ -117,6 +117,13 @@ class BaseModule extends ModuleObject
         if ($val instanceof BaseModel) {
             $val = $val->toPlainObject();
         }
+        if (is_array($val)) {
+            foreach ($val as $key => $v) {
+                if ($v instanceof BaseModel) {
+                    $val[$key] = $v->toPlainObject();
+                }
+            }
+        }
         parent::set($key, $val);
     }
 
