@@ -103,6 +103,7 @@ class Boot
         define('RXMAKE_REQUEST_METHOD', $httpMethod);
 
         if ($httpMethod !== 'POST' && $httpMethod !== 'PUT' && $httpMethod !== 'PATCH') {
+            $_SERVER['REQUEST_METHOD'] = 'GET';
             return;
         }
         $_SERVER['REQUEST_METHOD'] = 'POST';
