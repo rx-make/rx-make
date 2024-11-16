@@ -57,8 +57,8 @@ abstract class BaseModel implements JsonSerializable, Serializable
             ),
             $primaryKey
         );
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $data ? static::create($data) : null;
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return isset($data[0]) ? static::create($data[0]) : null;
     }
 
     /**

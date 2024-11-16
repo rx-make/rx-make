@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace RxMake\Modules\GithubPuller\Controllers\Client;
 
 use ModuleObject;
-use Rhymix\Framework\Exceptions\InvalidRequest;
 use Rhymix\Framework\Exceptions\TargetNotFound;
 use RuntimeException;
 use RxMake\Modules\GithubPuller\Models\GithubPullerConfig;
