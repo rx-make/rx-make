@@ -124,10 +124,12 @@ class Boot
         register_shutdown_function(function () {
             (new ShutdownEvent())->publish('before');
 
-            session_write_close();
-            ignore_user_abort(true);
-            fastcgi_finish_request();
-            set_time_limit(0);
+            if (PHP_SAPI !== 'cli') {
+                session_write_close();
+                ignore_user_abort(true);
+                fastcgi_finish_request();
+                set_time_limit(0);
+            }
 
             (new ShutdownEvent())->publish('after');
         });
