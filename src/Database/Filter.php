@@ -352,4 +352,14 @@ class Filter
 
         return $this;
     }
+
+    /**
+     * Get empty filter closure.
+     *
+     * @return Closure
+     */
+    public static function empty(): Closure
+    {
+        return static fn (Filter $f) => $f->eq('1', 1);
+    }
 }
