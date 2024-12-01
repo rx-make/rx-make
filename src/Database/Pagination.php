@@ -43,7 +43,8 @@ final class Pagination implements JsonSerializable, Serializable
     public function jsonSerialize(): object
     {
         return (object) [
-            'totalCount' => $this->totalItems,
+            'totalItems' => $this->totalItems,
+            'totalPages' => $this->totalPages,
             'limit' => $this->limit,
         ];
     }
