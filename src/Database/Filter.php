@@ -36,6 +36,13 @@ class Filter
      */
     public function get(): array
     {
+        if ($this->stack['parentStack'] === null && empty($this->stack['children'])) {
+            return [
+                'query' => '1 = 1',
+                'bindings' => [],
+            ];
+        }
+
         $handleExpression = function (array $stack) {
             if ($stack['operator'] === 'IS NULL' || $stack['operator'] === 'IS NOT NULL') {
                 return [
@@ -360,11 +367,6 @@ class Filter
      */
     public static function empty(): Closure
     {
-        return static fn (Filter &$f) => $f = new class () extends Filter {
-            public function get(): array
-            {
-                return [ 'query' => '1 = 1', 'bindings' => [] ];
-            }
-        };
+        return static fn (Filter $f) => $f;
     }
 }
