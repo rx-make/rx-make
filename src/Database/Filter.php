@@ -360,6 +360,11 @@ class Filter
      */
     public static function empty(): Closure
     {
-        return static fn (Filter $f) => $f->eq('1', 1);
+        return static fn (Filter &$f) => $f = new class () extends Filter {
+            public function get(): array
+            {
+                return [ 'query' => '1 = 1', 'bindings' => [] ];
+            }
+        };
     }
 }
