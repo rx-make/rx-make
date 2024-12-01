@@ -99,6 +99,26 @@ abstract class BaseModel implements JsonSerializable, Serializable
         }, $data);
     }
 
+    public static function pagination(Closure $where, int $limit = 10): Pagination
+    {
+        $where($filter = new Filter());
+        $filterOutput = $filter->get();
+
+        $oDB = DB::getInstance();
+        $stmt = $oDB->query(
+            sprintf(
+                'SELECT COUNT(*) as count FROM %s AS %s WHERE %s LIMIT %s',
+                static::TableName,
+                static::TableName,
+                $filterOutput['query'],
+                $limit,
+            ),
+            ...$filterOutput['bindings'],
+        );
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        return new Pagination((int) $data['count'], $limit);
+    }
+
     /**
      * Insert $item into database.
      *
