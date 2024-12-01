@@ -45,6 +45,9 @@ abstract class BaseModuleRoutes extends BaseModule
      */
     public function handleInternal(): BaseObject
     {
+        if ($_SERVER['HTTP_ACCEPT'] === 'application/json' || $_GET['format'] === 'json') {
+            Context::setResponseMethod('JSON');
+        }
         try {
             if (!$this->routeActName) {
                 throw new RuntimeException('Cannot call handleInternal() directly');
@@ -120,10 +123,6 @@ abstract class BaseModuleRoutes extends BaseModule
 
             foreach ($output as $key => $value) {
                 $this->{$key} = $value;
-            }
-
-            if ($_SERVER['HTTP_ACCEPT'] === 'application/json') {
-                Context::setResponseMethod('JSON');
             }
             return $output;
         }
