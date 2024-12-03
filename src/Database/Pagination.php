@@ -9,9 +9,9 @@ use Serializable;
 
 final class Pagination implements JsonSerializable, Serializable
 {
-    private int $totalItems;
-    private int $totalPages;
-    private int $limit;
+    public int $totalItems;
+    public int $totalPages;
+    public int $limit;
 
     public function __construct(int $totalItems, int $limit)
     {
