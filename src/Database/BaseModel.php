@@ -115,7 +115,8 @@ abstract class BaseModel implements JsonSerializable, Serializable
             ),
             ...$filterOutput['bindings'],
         );
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $data = current($data);
         return new Pagination((int) $data['count'], $limit);
     }
 
