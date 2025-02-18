@@ -19,7 +19,7 @@ class Environment
             throw new RuntimeException('Environment already registered');
         }
         self::$dotenv = Dotenv::createImmutable($envDir, $envFile);
-        self::$dotenv->load();
+        self::$dotenv->safeLoad();
     }
 
     public static function injectIntoRhymix(): void
