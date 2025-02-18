@@ -275,7 +275,7 @@ abstract class BaseModel implements JsonSerializable, Serializable
                 continue;
             }
             if ($column['type'] === 'object') {
-                $obj->{$name} = json_encode($this->{$name});
+                $obj->{$name} = json_encode($this->{$name}, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
                 continue;
             }
             $obj->{$name} = $this->{$name};
